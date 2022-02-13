@@ -76,7 +76,7 @@ func (u *UserService) UpdateUser(username string, balance int) (*model.User, err
 	//create new user struct
 	user := &model.User{
 		Username: username,
-		Balance:  balance,
+		Balance:  result,
 	}
 
 	//using repository's function, it returns user data
