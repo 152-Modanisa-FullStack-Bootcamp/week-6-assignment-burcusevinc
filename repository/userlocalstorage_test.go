@@ -9,9 +9,12 @@ import (
 func TestRepositoryGetAllUsers(t *testing.T) {
 	store := NewUserLocalStorage()
 
-	length := len(store.GetAllUsers())
+	users, err := store.GetAllUsers()
+
+	length := len(users)
 
 	assert.Equal(t, 0, length)
+	assert.Nil(t, err)
 }
 
 func TestRepositoryGetUser(t *testing.T) {
@@ -47,11 +50,12 @@ func TestRepositoryCreateUser(t *testing.T) {
 		Balance:  88,
 	}
 
-	users := store.GetAllUsers()
+	users, err := store.GetAllUsers()
 
 	length := len(users)
 	store.CreateUser(&User)
 
+	assert.Nil(t, err)
 	assert.Equal(t, length+1, len(users))
 }
 

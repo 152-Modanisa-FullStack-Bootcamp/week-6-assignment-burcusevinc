@@ -9,7 +9,7 @@ import (
 
 //Service package interface
 type IUserService interface {
-	GetAllUsers() []*model.User
+	GetAllUsers() ([]*model.User, error)
 	GetUser(username string) (*model.User, error)
 	CreateUser(username string) *model.User
 	UpdateUser(username string, balance int) (*model.User, error)
@@ -22,9 +22,12 @@ type UserService struct {
 	MinimumBalanceAmount int
 }
 
-func (u *UserService) GetAllUsers() []*model.User {
+func (u *UserService) GetAllUsers() ([]*model.User, error) {
 	//using repository's function, it returns all users data
-	getUsers := u.store.GetAllUsers()
+	getUsers, err := u.store.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
 
 	//list of users
 	users := make([]*model.User, 0, len(getUsers))
@@ -32,7 +35,7 @@ func (u *UserService) GetAllUsers() []*model.User {
 	for _, user := range getUsers {
 		users = append(users, user)
 	}
-	return users
+	return users, nil
 }
 
 func (u *UserService) GetUser(username string) (*model.User, error) {

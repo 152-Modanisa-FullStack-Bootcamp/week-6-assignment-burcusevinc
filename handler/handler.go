@@ -24,7 +24,12 @@ type WalletHandler struct {
 
 func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	//using service's function, it returns all users
-	users := h.service.GetAllUsers()
+	users, err := h.service.GetAllUsers()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError) //500 HTTP response
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	//turn that list into JSON
 	jsonBytes, err := json.Marshal(users)
@@ -32,6 +37,7 @@ func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		return
 	}
 	//added http header values.
 	w.Header().Add("content-type", "application/json")
@@ -122,6 +128,7 @@ func (h *WalletHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	balance := user["balance"]
 	//using service's function, it returns updated user
 	h.service.UpdateUser(username, balance)
+	w.Header().Add("content-type", "application/json")
 }
 
 func (h *WalletHandler) WalletMethods(w http.ResponseWriter, r *http.Request) {

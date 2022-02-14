@@ -49,11 +49,12 @@ func (mr *MockIUserLocalStorageMockRecorder) CreateUser(user interface{}) *gomoc
 }
 
 // GetAllUsers mocks base method.
-func (m *MockIUserLocalStorage) GetAllUsers() map[string]*model.User {
+func (m *MockIUserLocalStorage) GetAllUsers() (map[string]*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllUsers")
 	ret0, _ := ret[0].(map[string]*model.User)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllUsers indicates an expected call of GetAllUsers.

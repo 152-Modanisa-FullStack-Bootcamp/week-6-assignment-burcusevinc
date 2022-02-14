@@ -24,11 +24,11 @@ func TestServiceGetAllUsers(t *testing.T) {
 	store := mock_service.NewMockIUserLocalStorage(gomock.NewController(t))
 	store.EXPECT().
 		GetAllUsers().
-		Return(storeReturn).
+		Return(storeReturn, nil).
 		Times(1)
 
 	service := NewService(store, 0, -100)
-	users := service.GetAllUsers()
+	users, err := service.GetAllUsers()
 
 	expectedUsers := make([]*model.User, 0)
 	expectedUsers = append(expectedUsers, &model.User{
@@ -40,12 +40,23 @@ func TestServiceGetAllUsers(t *testing.T) {
 	})
 
 	assert.Equal(t, &expectedUsers, &users)
+	assert.Nil(t, err)
 }
 
-const (
-	initialBalanceAmount = 0
-	minimumBalanceAmount = -100
-)
+func TestServiceRepoReturnError(t *testing.T) {
+	serviceError := errors.New("test error")
+	store := mock_service.NewMockIUserLocalStorage(gomock.NewController(t))
+	store.EXPECT().
+		GetAllUsers().
+		Return(nil, serviceError).
+		Times(1)
+
+	service := NewService(store, 0, -100)
+	users, err := service.GetAllUsers()
+
+	assert.ErrorIs(t, err, serviceError)
+	assert.Nil(t, users)
+}
 
 func TestServiceGetUser(t *testing.T) {
 	storeReturn := &model.User{
@@ -141,3 +152,8 @@ func TestServiceUpdateUserMinimumBalanceCheck(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, updatedUser)
 }
+
+const (
+	initialBalanceAmount = 0
+	minimumBalanceAmount = -100
+)

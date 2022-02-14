@@ -7,7 +7,7 @@ import (
 
 //Repository package interface
 type IUserLocalStorage interface {
-	GetAllUsers() map[string]*model.User
+	GetAllUsers() (map[string]*model.User, error)
 	GetUser(username string) (*model.User, error)
 	CreateUser(user *model.User) *model.User
 	UpdateUser(user *model.User) *model.User
@@ -19,9 +19,9 @@ type UserLocalStorage struct {
 }
 
 //it returns all user data
-func (u *UserLocalStorage) GetAllUsers() map[string]*model.User {
+func (u *UserLocalStorage) GetAllUsers() (map[string]*model.User, error) {
 	users := u.Users
-	return users
+	return users, nil
 }
 
 //it returns wanted user or an error

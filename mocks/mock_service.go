@@ -49,11 +49,12 @@ func (mr *MockIUserServiceMockRecorder) CreateUser(username interface{}) *gomock
 }
 
 // GetAllUsers mocks base method.
-func (m *MockIUserService) GetAllUsers() []*model.User {
+func (m *MockIUserService) GetAllUsers() ([]*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllUsers")
 	ret0, _ := ret[0].([]*model.User)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetAllUsers indicates an expected call of GetAllUsers.

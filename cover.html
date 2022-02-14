@@ -55,11 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">go.mod/handler/handler.go (0.0%)</option>
+				<option value="file0">go.mod/handler/handler.go (31.7%)</option>
 				
 				<option value="file1">go.mod/repository/userlocalstorage.go (100.0%)</option>
 				
-				<option value="file2">go.mod/service/service.go (87.5%)</option>
+				<option value="file2">go.mod/service/service.go (88.5%)</option>
 				
 				</select>
 			</div>
@@ -97,19 +97,25 @@ type WalletHandler struct {
         service service.IUserService
 }
 
-func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         //using service's function, it returns all users
-        users := h.service.GetAllUsers()
+        users, err := h.service.GetAllUsers()
+        if err != nil </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusInternalServerError) //500 HTTP response
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
 
         //turn that list into JSON
-        jsonBytes, err := json.Marshal(users)
+        <span class="cov8" title="1">jsonBytes, err := json.Marshal(users)
         //if error is not nil, sends 500 HTTP response, and write an error.
         if err != nil </span><span class="cov0" title="0">{
                 w.WriteHeader(http.StatusInternalServerError)
                 w.Write([]byte(err.Error()))
+                return
         }</span>
         //added http header values.
-        <span class="cov0" title="0">w.Header().Add("content-type", "application/json")
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
         //sends 200 HTTP response
         w.WriteHeader(http.StatusOK)
         //write the users([]byte)
@@ -117,7 +123,7 @@ func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) <spa
 
 }
 
-func (h *WalletHandler) GetUser(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+func (h *WalletHandler) GetUser(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
         //it returns what comes after / path
         username := strings.TrimPrefix(r.URL.Path, "/")
 
@@ -129,7 +135,7 @@ func (h *WalletHandler) GetUser(w http.ResponseWriter, r *http.Request) <span cl
         }</span>
 
         //turn that user list into JSON
-        <span class="cov0" title="0">jsonBytes, err := json.Marshal(user)
+        <span class="cov8" title="1">jsonBytes, err := json.Marshal(user)
         if err != nil </span><span class="cov0" title="0">{
                 //500 HTTP response
                 w.WriteHeader(http.StatusInternalServerError)
@@ -137,7 +143,7 @@ func (h *WalletHandler) GetUser(w http.ResponseWriter, r *http.Request) <span cl
                 w.Write([]byte(err.Error()))
         }</span>
         //added http header values.
-        <span class="cov0" title="0">w.Header().Add("content-type", "application/json")
+        <span class="cov8" title="1">w.Header().Add("content-type", "application/json")
         //sends 200 HTTP response
         w.WriteHeader(http.StatusOK)
         //write the users([]byte)
@@ -225,7 +231,7 @@ func (h *WalletHandler) WalletMethods(w http.ResponseWriter, r *http.Request) <s
 }
 
 //constructure function
-func NewWalletHandler(s service.IUserService) IWalletHandler <span class="cov0" title="0">{
+func NewWalletHandler(s service.IUserService) IWalletHandler <span class="cov8" title="1">{
         return &amp;WalletHandler{service: s}
 }</span>
 </pre>
@@ -239,7 +245,7 @@ import (
 
 //Repository package interface
 type IUserLocalStorage interface {
-        GetAllUsers() map[string]*model.User
+        GetAllUsers() (map[string]*model.User, error)
         GetUser(username string) (*model.User, error)
         CreateUser(user *model.User) *model.User
         UpdateUser(user *model.User) *model.User
@@ -251,9 +257,9 @@ type UserLocalStorage struct {
 }
 
 //it returns all user data
-func (u *UserLocalStorage) GetAllUsers() map[string]*model.User <span class="cov8" title="1">{
+func (u *UserLocalStorage) GetAllUsers() (map[string]*model.User, error) <span class="cov8" title="1">{
         users := u.Users
-        return users
+        return users, nil
 }</span>
 
 //it returns wanted user or an error
@@ -303,7 +309,7 @@ import (
 
 //Service package interface
 type IUserService interface {
-        GetAllUsers() []*model.User
+        GetAllUsers() ([]*model.User, error)
         GetUser(username string) (*model.User, error)
         CreateUser(username string) *model.User
         UpdateUser(username string, balance int) (*model.User, error)
@@ -316,17 +322,20 @@ type UserService struct {
         MinimumBalanceAmount int
 }
 
-func (u *UserService) GetAllUsers() []*model.User <span class="cov8" title="1">{
+func (u *UserService) GetAllUsers() ([]*model.User, error) <span class="cov8" title="1">{
         //using repository's function, it returns all users data
-        getUsers := u.store.GetAllUsers()
+        getUsers, err := u.store.GetAllUsers()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
 
         //list of users
-        users := make([]*model.User, 0, len(getUsers))
+        <span class="cov8" title="1">users := make([]*model.User, 0, len(getUsers))
         //making new users struct
         for _, user := range getUsers </span><span class="cov8" title="1">{
                 users = append(users, user)
         }</span>
-        <span class="cov8" title="1">return users</span>
+        <span class="cov8" title="1">return users, nil</span>
 }
 
 func (u *UserService) GetUser(username string) (*model.User, error) <span class="cov8" title="1">{
