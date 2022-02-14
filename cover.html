@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>handler: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">go.mod/handler/handler.go (0.0%)</option>
+				
+				<option value="file1">go.mod/repository/userlocalstorage.go (100.0%)</option>
+				
+				<option value="file2">go.mod/service/service.go (87.5%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package handler
+
+import (
+        "encoding/json"
+        "go.mod/service"
+        "io/ioutil"
+        "net/http"
+        "strings"
+)
+
+//Handler package interface
+type IWalletHandler interface {
+        GetAllUsers(w http.ResponseWriter, r *http.Request)
+        GetUser(w http.ResponseWriter, r *http.Request)
+        CreateUser(w http.ResponseWriter, r *http.Request)
+        UpdateUser(w http.ResponseWriter, r *http.Request)
+        WalletMethods(w http.ResponseWriter, r *http.Request)
+}
+
+//Handler package struct implements service package's interface.
+type WalletHandler struct {
+        service service.IUserService
+}
+
+func (h *WalletHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        //using service's function, it returns all users
+        users := h.service.GetAllUsers()
+
+        //turn that list into JSON
+        jsonBytes, err := json.Marshal(users)
+        //if error is not nil, sends 500 HTTP response, and write an error.
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                w.Write([]byte(err.Error()))
+        }</span>
+        //added http header values.
+        <span class="cov0" title="0">w.Header().Add("content-type", "application/json")
+        //sends 200 HTTP response
+        w.WriteHeader(http.StatusOK)
+        //write the users([]byte)
+        w.Write(jsonBytes)</span>
+
+}
+
+func (h *WalletHandler) GetUser(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        //it returns what comes after / path
+        username := strings.TrimPrefix(r.URL.Path, "/")
+
+        //using service's function, it returns wanted user
+        user, err := h.service.GetUser(username)
+        if err != nil </span><span class="cov0" title="0">{
+                //404 HTTP response
+                w.WriteHeader(http.StatusNotFound)
+        }</span>
+
+        //turn that user list into JSON
+        <span class="cov0" title="0">jsonBytes, err := json.Marshal(user)
+        if err != nil </span><span class="cov0" title="0">{
+                //500 HTTP response
+                w.WriteHeader(http.StatusInternalServerError)
+                //write an error
+                w.Write([]byte(err.Error()))
+        }</span>
+        //added http header values.
+        <span class="cov0" title="0">w.Header().Add("content-type", "application/json")
+        //sends 200 HTTP response
+        w.WriteHeader(http.StatusOK)
+        //write the users([]byte)
+        w.Write(jsonBytes)</span>
+}
+
+func (h *WalletHandler) CreateUser(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        //it returns what comes after / path
+        username := strings.TrimPrefix(r.URL.Path, "/")
+
+        //using service's function, it creat a user
+        user := h.service.CreateUser(username)
+
+        //turn that user list into JSON
+        jsonBytes, err := json.Marshal(user)
+        if err != nil </span><span class="cov0" title="0">{
+                w.WriteHeader(http.StatusInternalServerError)
+                return
+        }</span>
+        //sends 201 HTTP response
+        <span class="cov0" title="0">w.WriteHeader(http.StatusCreated)
+        //write the users([]byte)
+        w.Write(jsonBytes)</span>
+}
+
+func (h *WalletHandler) UpdateUser(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        //it returns what comes after / path
+        username := strings.TrimPrefix(r.URL.Path, "/")
+
+        //reads request body
+        bodyBytes, err := ioutil.ReadAll(r.Body)
+        //close body, after the execution.
+        defer r.Body.Close()
+
+        if err != nil </span><span class="cov0" title="0">{
+                //sends 500 HTTP response
+                w.WriteHeader(http.StatusInternalServerError)
+                //write an error
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        //make a map value
+        <span class="cov0" title="0">user := make(map[string]int)
+        //turn that json byte into user map
+        err = json.Unmarshal(bodyBytes, &amp;user)
+
+        if err != nil </span><span class="cov0" title="0">{
+                //sends 500 HTTP response
+                w.WriteHeader(http.StatusInternalServerError)
+                //write an error
+                w.Write([]byte(err.Error()))
+                return
+        }</span>
+
+        //initialize balance value
+        <span class="cov0" title="0">balance := user["balance"]
+        //using service's function, it returns updated user
+        h.service.UpdateUser(username, balance)</span>
+}
+
+func (h *WalletHandler) WalletMethods(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        //it returns what comes after / path
+        username := strings.TrimPrefix(r.URL.Path, "/")
+
+        //method switch-case
+        switch </span>{
+        case r.Method == "GET" &amp;&amp; username == "":<span class="cov0" title="0">
+                h.GetAllUsers(w, r)
+                return</span>
+        case r.Method == "GET" &amp;&amp; username != "":<span class="cov0" title="0">
+                h.GetUser(w, r)</span>
+        case r.Method == "PUT" &amp;&amp; username != "":<span class="cov0" title="0">
+                h.CreateUser(w, r)
+                return</span>
+        case r.Method == "POST" &amp;&amp; username != "":<span class="cov0" title="0">
+                h.UpdateUser(w, r)
+                return</span>
+        default:<span class="cov0" title="0">
+                //default 405 HTTP
+                w.WriteHeader(http.StatusMethodNotAllowed)
+                w.Write([]byte("method not allowed"))
+                return</span>
+        }
+}
+
+//constructure function
+func NewWalletHandler(s service.IUserService) IWalletHandler <span class="cov0" title="0">{
+        return &amp;WalletHandler{service: s}
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package repository
+
+import (
+        "errors"
+        "go.mod/model"
+)
+
+//Repository package interface
+type IUserLocalStorage interface {
+        GetAllUsers() map[string]*model.User
+        GetUser(username string) (*model.User, error)
+        CreateUser(user *model.User) *model.User
+        UpdateUser(user *model.User) *model.User
+}
+
+//Repository package struct implements model User struct map
+type UserLocalStorage struct {
+        Users map[string]*model.User
+}
+
+//it returns all user data
+func (u *UserLocalStorage) GetAllUsers() map[string]*model.User <span class="cov8" title="1">{
+        users := u.Users
+        return users
+}</span>
+
+//it returns wanted user or an error
+func (u *UserLocalStorage) GetUser(username string) (*model.User, error) <span class="cov8" title="1">{
+        for _, user := range u.Users </span><span class="cov8" title="1">{
+                if user.Username == username </span><span class="cov8" title="1">{
+                        return user, nil
+                }</span>
+        }
+        <span class="cov8" title="1">return nil, errors.New("User is not found!")</span>
+}
+
+//it returns username
+func (u *UserLocalStorage) CreateUser(user *model.User) *model.User <span class="cov8" title="1">{
+        u.Users[user.Username] = &amp;model.User{
+                Username: user.Username,
+                Balance:  user.Balance,
+        }
+        return u.Users[user.Username]
+}</span>
+
+//it returns username
+func (u *UserLocalStorage) UpdateUser(user *model.User) *model.User <span class="cov8" title="1">{
+        u.Users[user.Username] = &amp;model.User{
+                Username: user.Username,
+                Balance:  user.Balance,
+        }
+        return u.Users[user.Username]
+}</span>
+
+//constructure function
+func NewUserLocalStorage() *UserLocalStorage <span class="cov8" title="1">{
+        return &amp;UserLocalStorage{
+                Users: make(map[string]*model.User),
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package service
+
+import (
+        "errors"
+        "fmt"
+        "go.mod/model"
+        "go.mod/repository"
+)
+
+//Service package interface
+type IUserService interface {
+        GetAllUsers() []*model.User
+        GetUser(username string) (*model.User, error)
+        CreateUser(username string) *model.User
+        UpdateUser(username string, balance int) (*model.User, error)
+}
+
+//Service package struct implements store package's interface and integer values.
+type UserService struct {
+        store                repository.IUserLocalStorage
+        InitialBalanceAmount int
+        MinimumBalanceAmount int
+}
+
+func (u *UserService) GetAllUsers() []*model.User <span class="cov8" title="1">{
+        //using repository's function, it returns all users data
+        getUsers := u.store.GetAllUsers()
+
+        //list of users
+        users := make([]*model.User, 0, len(getUsers))
+        //making new users struct
+        for _, user := range getUsers </span><span class="cov8" title="1">{
+                users = append(users, user)
+        }</span>
+        <span class="cov8" title="1">return users</span>
+}
+
+func (u *UserService) GetUser(username string) (*model.User, error) <span class="cov8" title="1">{
+        //using repository's function, it returns username data
+        user, err := u.store.GetUser(username)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return user, err</span>
+}
+
+func (u *UserService) CreateUser(username string) *model.User <span class="cov8" title="1">{
+        //it returns the wanted user
+        existUser, err := u.store.GetUser(username)
+        if err == nil </span><span class="cov0" title="0">{
+                return existUser
+        }</span>
+        //create new user struct, balance amount is, initialbalanceamount
+        <span class="cov8" title="1">user := &amp;model.User{
+                Username: username,
+                Balance:  u.InitialBalanceAmount,
+        }
+
+        return u.store.CreateUser(user)</span>
+}
+
+func (u *UserService) UpdateUser(username string, balance int) (*model.User, error) <span class="cov8" title="1">{
+        //using repository's function, it returns user data
+        getUsers, err := u.GetUser(username)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        //initialize result value, add balance value with user value.
+        <span class="cov8" title="1">result := getUsers.Balance + (balance)
+
+        //if result, smaller than minimum balance amount, return an error
+        if result &lt; u.MinimumBalanceAmount </span><span class="cov8" title="1">{
+                return nil, errors.New(fmt.Sprintf("Wallet balance amount never belows %d", u.MinimumBalanceAmount))
+        }</span>
+        //create new user struct
+        <span class="cov8" title="1">user := &amp;model.User{
+                Username: username,
+                Balance:  result,
+        }
+
+        //using repository's function, it returns user data
+        updatedUser := u.store.UpdateUser(user)
+        return updatedUser, nil</span>
+}
+
+//constructure function
+func NewService(store repository.IUserLocalStorage, iba int, mba int) IUserService <span class="cov8" title="1">{
+        return &amp;UserService{
+                store:                store,
+                InitialBalanceAmount: iba,
+                MinimumBalanceAmount: mba,
+        }
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

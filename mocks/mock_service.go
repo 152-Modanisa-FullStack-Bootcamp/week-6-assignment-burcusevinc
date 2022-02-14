@@ -35,9 +35,11 @@ func (m *MockIUserService) EXPECT() *MockIUserServiceMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockIUserService) CreateUser(username string) {
+func (m *MockIUserService) CreateUser(username string) *model.User {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CreateUser", username)
+	ret := m.ctrl.Call(m, "CreateUser", username)
+	ret0, _ := ret[0].(*model.User)
+	return ret0
 }
 
 // CreateUser indicates an expected call of CreateUser.
